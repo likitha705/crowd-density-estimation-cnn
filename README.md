@@ -49,11 +49,11 @@ streamlit run app.py
 ```
 
 ## Results
-| Dataset | MAE | MSE |
-|---|---|---|
-| ShanghaiTech Part A | _85.38_ | _122.87_ |
+| Dataset | MAE | MSE | R² |
+|---|---|---|---|
+| ShanghaiTech Part A | 85.38 | 122.87 | 0.873 |
 
-Add sample density-map images in a `results/` folder.
+![Regression plot](results/regression_plot.png)
 
 ## Live demo
 _https://crowd-density-estimation-cnn-erfselzgfmhfpaveudwdbn.streamlit.app/Add your Streamlit Cloud link here after deploying._
