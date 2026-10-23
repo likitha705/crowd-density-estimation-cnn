@@ -56,4 +56,4 @@ streamlit run app.py
 Add sample density-map images in a `results/` folder.
 
 ## Live demo
-_Add your Streamlit Cloud link here after deploying._
+_https://crowd-density-estimation-cnn-erfselzgfmhfpaveudwdbn.streamlit.app/Add your Streamlit Cloud link here after deploying._
