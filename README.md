@@ -51,7 +51,7 @@ streamlit run app.py
 ## Results
 | Dataset | MAE | MSE |
 |---|---|---|
-| ShanghaiTech Part A | _fill in_ | _fill in_ |
+| ShanghaiTech Part A | _85.38_ | _122.87_ |
 
 Add sample density-map images in a `results/` folder.
 
