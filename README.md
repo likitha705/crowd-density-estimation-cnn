@@ -55,5 +55,5 @@ streamlit run app.py
 
 ![Regression plot](results/regression_plot.png)
 
-## Live demo
-_https://crowd-density-estimation-cnn-erfselzgfmhfpaveudwdbn.streamlit.app/Add your Streamlit Cloud link here after deploying._
+## Live data
+(https://crowd-density-estimation-cnn-erfselzgfmhfpaveudwdbn.streamlit.app/)/Add your Streamlit Cloud link here after deploying._
