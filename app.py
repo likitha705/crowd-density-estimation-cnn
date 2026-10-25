@@ -9,11 +9,6 @@ from PIL import Image
 from utils import load_model, predict, safety_level
  
 WEIGHTS = "weights/model.pth"
-PLOT = "results/regression_plot.png"
-CURVES = "results/training_curves.png"
- 
-# Test-set results from evaluate.py (ShanghaiTech Part A, 182 test images)
-MAE, MSE, R2 = 82.90, 125.91, 0.867
  
 st.set_page_config(page_title="Crowd-Safety Dashboard", page_icon="👥", layout="wide")
 st.title("👥 Venue Crowd-Safety Dashboard")
@@ -30,86 +25,50 @@ def get_model():
     return load_model(WEIGHTS)
  
  
-tab_est, tab_perf = st.tabs(["🎥 Crowd Estimation", "📈 Model Performance (Regression)"])
+if not os.path.exists(WEIGHTS):
+    st.warning(f"Trained weights not found at `{WEIGHTS}`. Run train.py first and add the file to the repo.")
+    st.stop()
  
-# ---------------------------------------------------------------- Estimation
-with tab_est:
-    if not os.path.exists(WEIGHTS):
-        st.warning(f"Trained weights not found at `{WEIGHTS}`. Run train.py first and add the file to the repo.")
-    else:
-        file = st.file_uploader("Upload a crowd image", type=["jpg", "jpeg", "png"])
+file = st.file_uploader("Upload a crowd image", type=["jpg", "jpeg", "png"])
  
-        if file:
-            image = Image.open(file).convert("RGB")
-            count, density = predict(get_model(), image)
-            level, advice = safety_level(count, threshold)
+if file:
+    image = Image.open(file).convert("RGB")
+    count, density = predict(get_model(), image)
+    level, advice = safety_level(count, threshold)
  
-            c1, c2, c3 = st.columns(3)
-            c1.metric("Estimated crowd count", f"{count:.0f}")
-            c2.metric("Safe capacity", threshold)
-            c3.metric("Occupancy", f"{100 * count / threshold:.0f}%")
+    c1, c2, c3 = st.columns(3)
+    c1.metric("Estimated crowd count", f"{count:.0f}")
+    c2.metric("Safe capacity", threshold)
+    c3.metric("Occupancy", f"{100 * count / threshold:.0f}%")
  
-            {"SAFE": st.success, "WARNING": st.warning, "DANGER": st.error}[level](
-                f"**{venue}: {level}**. {advice}"
-            )
+    {"SAFE": st.success, "WARNING": st.warning, "DANGER": st.error}[level](f"**{venue}: {level}**. {advice}")
  
-            # Density map resized to the image so it can be overlaid on top of it
-            d = np.clip(density, 0, None)
-            d = d / d.max() if d.max() > 0 else d
-            heat = Image.fromarray((d * 255).astype(np.uint8)).resize(image.size, Image.BICUBIC)
-            heat = np.asarray(heat, dtype=np.float32) / 255.0
+    # Density map resized to the image so it can be overlaid on top of it
+    d = np.clip(density, 0, None)
+    d = d / d.max() if d.max() > 0 else d
+    heat = Image.fromarray((d * 255).astype(np.uint8)).resize(image.size, Image.BICUBIC)
+    heat = np.asarray(heat, dtype=np.float32) / 255.0
  
-            col1, col2, col3 = st.columns(3)
-            col1.image(image, caption="Input image", use_container_width=True)
+    col1, col2, col3 = st.columns(3)
+    col1.image(image, caption="Input image", use_container_width=True)
  
-            fig, ax = plt.subplots()
-            ax.imshow(heat, cmap="jet")
-            ax.axis("off")
-            col2.pyplot(fig)
-            col2.caption("Predicted density map (regression output)")
+    fig, ax = plt.subplots()
+    ax.imshow(heat, cmap="jet")
+    ax.axis("off")
+    col2.pyplot(fig)
+    col2.caption("Predicted density map (regression output)")
  
-            fig2, ax2 = plt.subplots()
-            ax2.imshow(image)
-            ax2.imshow(heat, cmap="jet", alpha=alpha)
-            ax2.axis("off")
-            col3.pyplot(fig2)
-            col3.caption("Density map overlaid on image")
- 
-            st.caption(
-                "The model regresses a density value for every region of the image. "
-                "Summing the density map gives the estimated crowd count."
-            )
-        else:
-            st.info("Upload an image to estimate the crowd count.")
- 
-# --------------------------------------------------------------- Performance
-with tab_perf:
-    st.subheader("Regression results on held-out test data")
-    m1, m2, m3 = st.columns(3)
-    m1.metric("MAE", f"{MAE:.2f}", help="Mean Absolute Error: average count error per image")
-    m2.metric("MSE (RMSE)", f"{MSE:.2f}", help="Root of mean squared error; penalises large errors")
-    m3.metric("R²", f"{R2:.3f}", help="1.0 = perfect fit between predicted and actual counts")
- 
-    st.subheader("Training and validation curves")
-    if os.path.exists(CURVES):
-        st.image(CURVES, caption="Training loss and validation MAE per epoch",
-                 use_container_width=True)
-    else:
-        st.info(f"Add `{CURVES}` to the repo to show the training curves here.")
-    st.caption(
-        "Training loss (MSE on density maps) falls as the model learns. Validation MAE is the "
-        "average count error on the held-out images after each epoch; the best epoch is kept."
-    )
- 
-    st.subheader("Predicted vs Actual (regression)")
-    if os.path.exists(PLOT):
-        st.image(PLOT, caption="Predicted vs Actual crowd count with fitted regression line",
-                 use_container_width=True)
-    else:
-        st.info(f"Add `{PLOT}` to the repo to show the regression plot here.")
+    fig2, ax2 = plt.subplots()
+    ax2.imshow(image)
+    ax2.imshow(heat, cmap="jet", alpha=alpha)
+    ax2.axis("off")
+    col3.pyplot(fig2)
+    col3.caption("Density map overlaid on image")
  
     st.caption(
-        "Each point is one test image. Points close to the dashed ideal line (y = x) mean the "
-        "predicted count matches the actual count."
+        "The model regresses a density value for every region of the image. "
+        "Summing the density map gives the estimated crowd count."
     )
+else:
+    st.info("Upload an image to estimate the crowd count.")
  
