@@ -51,7 +51,7 @@ streamlit run app.py
 ## Results
 | Dataset | MAE | MSE | R² |
 |---|---|---|---|
-| ShanghaiTech Part A | 85.38 | 122.87 | 0.873 |
+| ShanghaiTech Part A | 82.90 | 125.91 | 0.873 |
 
 ![Regression plot](results/regression_plot.png)
 
